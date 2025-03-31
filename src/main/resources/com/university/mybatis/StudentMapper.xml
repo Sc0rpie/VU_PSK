@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.university.mybatis.StudentMapper">
+
+    <resultMap id="StudentMap" type="Student">
+        <id property="id" column="id"/>
+        <result property="firstName" column="first_name"/>
+        <result property="lastName" column="last_name"/>
+        <result property="email" column="email"/>
+        <collection property="clubs" ofType="Club">
+            <id property="id" column="club_id"/>
+            <result property="name" column="club_name"/>
+            <result property="description" column="club_description"/>
+        </collection>
+        <collection property="courses" ofType="Course">
+            <id property="id" column="course_id"/>
+            <result property="name" column="course_name"/>
+            <result property="code" column="course_code"/>
+            <result property="credits" column="course_credits"/>
+        </collection>
+    </resultMap>
+
+    <select id="findAll" resultMap="StudentMap">
+        SELECT 
+            s.id, s.first_name, s.last_name, s.email,
+            c.id as club_id, c.name as club_name, c.description as club_description,
+            co.id as course_id, co.name as course_name, co.code as course_code, co.credits as course_credits
+        FROM students s
+        LEFT JOIN student_clubs sc ON s.id = sc.student_id
+        LEFT JOIN clubs c ON sc.club_id = c.id
+        LEFT JOIN student_courses sco ON s.id = sco.student_id
+        LEFT JOIN courses co ON sco.course_id = co.id
+    </select>
+
+    <select id="findById" resultMap="StudentMap" parameterType="long">
+        SELECT 
+            s.id, s.first_name, s.last_name, s.email,
+            c.id as club_id, c.name as club_name, c.description as club_description,
+            co.id as course_id, co.name as course_name, co.code as course_code, co.credits as course_credits
+        FROM students s
+        LEFT JOIN student_clubs sc ON s.id = sc.student_id
+        LEFT JOIN clubs c ON sc.club_id = c.id
+        LEFT JOIN student_courses sco ON s.id = sco.student_id
+        LEFT JOIN courses co ON sco.course_id = co.id
+        WHERE s.id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="Student" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO students (first_name, last_name, email)
+        VALUES (#{firstName}, #{lastName}, #{email})
+    </insert>
+    
+    <insert id="addStudentToClub">
+        INSERT INTO student_clubs (student_id, club_id)
+        VALUES (#{studentId}, #{clubId})
+    </insert>
+    
+    <insert id="addStudentToCourse">
+        INSERT INTO student_courses (student_id, course_id)
+        VALUES (#{studentId}, #{courseId})
+    </insert>
+</mapper>

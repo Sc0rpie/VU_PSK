@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+    <title>University Management System</title>
+    <h:outputStylesheet>
+        .ui-datatable .ui-datatable-header {
+            text-align: right !important;
+        }
+        .menu-container {
+            margin-bottom: 20px;
+        }
+    </h:outputStylesheet>
+</h:head>
+<h:body>
+    <div class="card">
+        <h2>University Management System</h2>
+        
+        <!-- Navigation Menu -->
+        <div class="menu-container">
+            <p:menubar>
+                <p:menuitem value="Students" url="index.xhtml" icon="pi pi-user"/>
+                <p:menuitem value="Clubs" url="clubs.xhtml" icon="pi pi-users"/>
+                <p:menuitem value="Courses" url="courses.xhtml" icon="pi pi-book"/>
+            </p:menubar>
+        </div>
+        
+        <p:tabView>
+            <p:tab title="Students">
+                <h:form id="studentForm">
+                    <p:panel header="Student Management">
+                        <p:messages id="messages" showDetail="true" closable="true">
+                            <p:autoUpdate/>
+                        </p:messages>
+                        
+                        <div class="ui-fluid p-formgrid p-grid">
+                            <div class="p-field p-col-12 p-md-4">
+                                <p:outputLabel for="firstName" value="First Name"/>
+                                <p:inputText id="firstName" value="#{studentBean.newStudent.firstName}" required="true"/>
+                            </div>
+                            
+                            <div class="p-field p-col-12 p-md-4">
+                                <p:outputLabel for="lastName" value="Last Name"/>
+                                <p:inputText id="lastName" value="#{studentBean.newStudent.lastName}" required="true"/>
+                            </div>
+                            
+                            <div class="p-field p-col-12 p-md-4">
+                                <p:outputLabel for="email" value="Email"/>
+                                <p:inputText id="email" value="#{studentBean.newStudent.email}" required="true"/>
+                            </div>
+                        </div>
+                        
+                        <p:commandButton value="Save Student" action="#{studentBean.saveStudent()}" 
+                                         update="studentTable studentForm" style="margin-top: 10px"/>
+                        
+                        <p:outputPanel id="toggleContainer">
+                            <p:toggleSwitch id="dataAccessToggle" value="#{studentBean.useJpa}" onLabel="JPA" offLabel="MyBatis">
+                                <p:ajax update="toggleContainer studentTable dataAccessInfo messages" 
+                                        listener="#{studentBean.toggleDataAccessMethod()}"/>
+                            </p:toggleSwitch>
+                        </p:outputPanel>
+                        
+                        <p:outputPanel id="dataAccessInfo" style="margin-top: 10px">
+                            <p:outputLabel value="Current data access method: " />
+                            <p:outputLabel value="#{studentBean.dataAccessType}" style="font-weight: bold; color: #{studentBean.useJpa ? 'green' : 'blue'}" />
+                        </p:outputPanel>
+                    </p:panel>
+                    
+                    <p:dataTable id="studentTable" value="#{studentBean.students}" var="student"
+                                 emptyMessage="No students found" rowKey="#{student.id}"
+                                 selection="#{studentBean.selectedStudent}" selectionMode="single"
+                                 style="margin-top: 20px">
+                        <f:facet name="header">
+                            Students List
+                        </f:facet>
+                        
+                        <p:ajax event="rowSelect" update="@form"/>
+                        
+                        <p:column headerText="ID">
+                            <h:outputText value="#{student.id}" />
+                        </p:column>
+                        
+                        <p:column headerText="First Name">
+                            <h:outputText value="#{student.firstName}" />
+                        </p:column>
+                        
+                        <p:column headerText="Last Name">
+                            <h:outputText value="#{student.lastName}" />
+                        </p:column>
+                        
+                        <p:column headerText="Email">
+                            <h:outputText value="#{student.email}" />
+                        </p:column>
+                        
+                        <p:column headerText="Clubs">
+                            <p:dataList value="#{student.clubs}" var="club" type="ordered" 
+                                        emptyMessage="No clubs joined">
+                                #{club.name}
+                            </p:dataList>
+                        </p:column>
+                        
+                        <p:column headerText="Courses">
+                            <p:dataList value="#{student.courses}" var="course" type="ordered" 
+                                        emptyMessage="No courses enrolled">
+                                #{course.code} - #{course.name}
+                            </p:dataList>
+                        </p:column>
+                    </p:dataTable>
+                    
+                    <p:panel id="enrollmentPanel" header="Enroll Student in Clubs and Courses" 
+                             rendered="#{studentBean.selectedStudent != null}"
+                             style="margin-top: 20px">
+                        
+                        <p:panelGrid columns="3" styleClass="ui-noborder">
+                            <h:outputText value="Selected Student:" />
+                            <h:outputText value="#{studentBean.selectedStudent.firstName} #{studentBean.selectedStudent.lastName}" 
+                                          style="font-weight: bold"/>
+                            <h:outputText value="" />
+                            
+                            <h:outputText value="Add to Club:" />
+                            <p:selectOneMenu id="clubMenu" value="#{studentBean.selectedClubId}">
+                                <f:selectItem itemLabel="Select Club" itemValue="#{null}" />
+                                <f:selectItems value="#{studentBean.availableClubs}" var="club"
+                                              itemLabel="#{club.name}" itemValue="#{club.id}" />
+                                <p:ajax event="change" update="addClubBtn" />
+                            </p:selectOneMenu>
+                            <p:commandButton id="addClubBtn" value="Add to Club" 
+                                           action="#{studentBean.addStudentToClub()}" 
+                                           update="studentTable enrollmentPanel messages"
+                                           process="clubMenu @this"
+                                           disabled="#{studentBean.selectedClubId == null}"/>
+                            
+                            <h:outputText value="Enroll in Course:" />
+                            <p:selectOneMenu id="courseMenu" value="#{studentBean.selectedCourseId}">
+                                <f:selectItem itemLabel="Select Course" itemValue="#{null}" />
+                                <f:selectItems value="#{studentBean.availableCourses}" var="course"
+                                              itemLabel="#{course.code} - #{course.name}" itemValue="#{course.id}" />
+                                <p:ajax event="change" update="enrollCourseBtn" />
+                            </p:selectOneMenu>
+                            <p:commandButton id="enrollCourseBtn" value="Enroll in Course" 
+                                           action="#{studentBean.addStudentToCourse()}" 
+                                           update="studentTable enrollmentPanel messages"
+                                           process="courseMenu @this"
+                                           disabled="#{studentBean.selectedCourseId == null}"/>
+                        </p:panelGrid>
+
+                        <p:outputPanel style="margin-top: 10px">
+                            <h:outputText value="Selected Club ID: #{studentBean.selectedClubId}" />
+                            <br/>
+                            <h:outputText value="Selected Course ID: #{studentBean.selectedCourseId}" />
+                        </p:outputPanel>
+                    </p:panel>
+                </h:form>
+            </p:tab>
+        </p:tabView>
+    </div>
+</h:body>
+</html>

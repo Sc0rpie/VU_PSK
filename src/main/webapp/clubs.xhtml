@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+    <title>University Clubs Management</title>
+    <h:outputStylesheet>
+        .menu-container {
+            margin-bottom: 20px;
+        }
+    </h:outputStylesheet>
+</h:head>
+<h:body>
+    <div class="card">
+        <h2>University Clubs Management</h2>
+        
+        <!-- Navigation Menu -->
+        <div class="menu-container">
+            <p:menubar>
+                <p:menuitem value="Students" url="index.xhtml" icon="pi pi-user"/>
+                <p:menuitem value="Clubs" url="clubs.xhtml" icon="pi pi-users"/>
+                <p:menuitem value="Courses" url="courses.xhtml" icon="pi pi-book"/>
+            </p:menubar>
+        </div>
+        
+        <h:form id="clubForm">
+            <p:panel header="Add New Club">
+                <p:messages id="messages" showDetail="true" closable="true">
+                    <p:autoUpdate/>
+                </p:messages>
+                
+                <div class="ui-fluid p-formgrid p-grid">
+                    <div class="p-field p-col-12 p-md-4">
+                        <p:outputLabel for="name" value="Club Name"/>
+                        <p:inputText id="name" value="#{clubBean.newClub.name}" required="true"/>
+                    </div>
+                    
+                    <div class="p-field p-col-12 p-md-8">
+                        <p:outputLabel for="description" value="Description"/>
+                        <p:inputTextarea id="description" value="#{clubBean.newClub.description}"/>
+                    </div>
+                </div>
+                
+                <p:commandButton value="Save Club" action="#{clubBean.saveClub()}" 
+                                 update="clubForm :clubDataForm:clubsTable" style="margin-top: 10px"/>
+                
+                <p:outputPanel id="toggleContainer">
+                    <p:toggleSwitch id="dataAccessToggle" value="#{clubBean.useJpa}" onLabel="JPA" offLabel="MyBatis">
+                        <p:ajax update="toggleContainer :clubDataForm:clubsTable dataAccessInfo messages" 
+                                listener="#{clubBean.toggleDataAccessMethod()}"/>
+                    </p:toggleSwitch>
+                </p:outputPanel>
+
+                <p:outputPanel id="dataAccessInfo" style="margin-top: 10px">
+                    <p:outputLabel value="Current data access method: " />
+                    <p:outputLabel value="#{clubBean.dataAccessType}" style="font-weight: bold; color: #{clubBean.useJpa ? 'green' : 'blue'}" />
+                </p:outputPanel>
+            </p:panel>
+        </h:form>
+        
+        <!-- List of Clubs -->
+        <h:form id="clubDataForm">
+            <p:dataTable id="clubsTable" value="#{clubBean.clubs}" var="club"
+                         emptyMessage="No clubs found" style="margin-top: 20px"
+                         selection="#{clubBean.selectedClub}" selectionMode="single"
+                         rowKey="#{club.id}">
+                         
+                <p:ajax event="rowSelect" listener="#{clubBean.selectClub}" 
+                        update=":clubDataForm:membersTable :clubDataForm:clubDebug" 
+                        process="@this"/>
+                
+                <f:facet name="header">
+                    Clubs List
+                </f:facet>
+                
+                <p:column headerText="ID">
+                    <h:outputText value="#{club.id}" />
+                </p:column>
+                
+                <p:column headerText="Name">
+                    <h:outputText value="#{club.name}" />
+                </p:column>
+                
+                <p:column headerText="Description">
+                    <h:outputText value="#{club.description}" />
+                </p:column>
+                
+                <p:column headerText="Members Count">
+                    <h:outputText value="#{club.members.size()}" />
+                </p:column>
+            </p:dataTable>
+            
+            <!-- Debug panel -->
+            <p:outputPanel id="clubDebug">
+                <p:panel rendered="#{clubBean.selectedClub != null}" header="Debug Info" toggleable="true" collapsed="true">
+                    <h:outputText value="Selected Club: #{clubBean.selectedClub.name}" /><br/>
+                    <h:outputText value="Member Count: #{clubBean.selectedClub.members.size()}" />
+                </p:panel>
+            </p:outputPanel>
+            
+            <!-- Club Members (demonstrates navigating many-to-many relationship) -->
+            <p:dataTable id="membersTable" value="#{clubBean.selectedClub.members}" var="student"
+                         emptyMessage="No members in this club or no club selected" 
+                         style="margin-top: 20px">
+                         
+                <f:facet name="header">
+                    Club Members
+                </f:facet>
+                
+                <p:column headerText="ID">
+                    <h:outputText value="#{student.id}" />
+                </p:column>
+                
+                <p:column headerText="First Name">
+                    <h:outputText value="#{student.firstName}" />
+                </p:column>
+                
+                <p:column headerText="Last Name">
+                    <h:outputText value="#{student.lastName}" />
+                </p:column>
+                
+                <p:column headerText="Email">
+                    <h:outputText value="#{student.email}" />
+                </p:column>
+            </p:dataTable>
+        </h:form>
+    </div>
+</h:body>
+</html>

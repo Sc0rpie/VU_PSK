@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.university.mybatis.ClubMapper">
+
+    <resultMap id="ClubMap" type="Club">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="description" column="description"/>
+        <collection property="members" ofType="Student">
+            <id property="id" column="student_id"/>
+            <result property="firstName" column="first_name"/>
+            <result property="lastName" column="last_name"/>
+            <result property="email" column="email"/>
+        </collection>
+    </resultMap>
+
+    <select id="findAll" resultMap="ClubMap">
+        SELECT 
+            c.id, c.name, c.description,
+            s.id as student_id, s.first_name, s.last_name, s.email
+        FROM clubs c
+        LEFT JOIN student_clubs sc ON c.id = sc.club_id
+        LEFT JOIN students s ON sc.student_id = s.id
+    </select>
+
+    <select id="findById" resultMap="ClubMap" parameterType="long">
+        SELECT 
+            c.id, c.name, c.description,
+            s.id as student_id, s.first_name, s.last_name, s.email
+        FROM clubs c
+        LEFT JOIN student_clubs sc ON c.id = sc.club_id
+        LEFT JOIN students s ON sc.student_id = s.id
+        WHERE c.id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="Club" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO clubs (name, description)
+        VALUES (#{name}, #{description})
+    </insert>
+</mapper>
