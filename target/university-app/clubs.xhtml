@@ -44,13 +44,6 @@
                 
                 <p:commandButton value="Save Club" action="#{clubBean.saveClub()}" 
                                  update="clubForm :clubDataForm:clubsTable" style="margin-top: 10px"/>
-                
-                <p:outputPanel id="toggleContainer">
-                    <p:toggleSwitch id="dataAccessToggle" value="#{clubBean.useJpa}" onLabel="JPA" offLabel="MyBatis">
-                        <p:ajax update="toggleContainer :clubDataForm:clubsTable dataAccessInfo messages" 
-                                listener="#{clubBean.toggleDataAccessMethod()}"/>
-                    </p:toggleSwitch>
-                </p:outputPanel>
 
                 <p:outputPanel id="dataAccessInfo" style="margin-top: 10px">
                     <p:outputLabel value="Current data access method: " />
