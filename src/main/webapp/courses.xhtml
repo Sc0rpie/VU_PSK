@@ -51,13 +51,6 @@
                 <p:commandButton value="Save Course" action="#{courseBean.saveCourse()}" 
                                  update="courseForm :courseDataForm:coursesTable" style="margin-top: 10px"/>
                 
-                <p:outputPanel id="toggleContainer">
-                    <p:toggleSwitch id="dataAccessToggle" value="#{courseBean.useJpa}" onLabel="JPA" offLabel="MyBatis">
-                        <p:ajax update="toggleContainer :courseDataForm:coursesTable dataAccessInfo messages" 
-                                listener="#{courseBean.toggleDataAccessMethod()}"/>
-                    </p:toggleSwitch>
-                </p:outputPanel>
-                
                 <p:outputPanel id="dataAccessInfo" style="margin-top: 10px">
                     <p:outputLabel value="Current data access method: " />
                     <p:outputLabel value="#{courseBean.dataAccessType}" style="font-weight: bold; color: #{courseBean.useJpa ? 'green' : 'blue'}" />
