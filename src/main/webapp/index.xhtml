@@ -24,6 +24,7 @@
                 <p:menuitem value="Students" url="index.xhtml" icon="pi pi-user"/>
                 <p:menuitem value="Clubs" url="clubs.xhtml" icon="pi pi-users"/>
                 <p:menuitem value="Courses" url="courses.xhtml" icon="pi pi-book"/>
+                <p:menuitem value="Departments" url="departments.xhtml" icon="pi pi-building"/>
             </p:menubar>
         </div>
         
@@ -50,18 +51,21 @@
                                 <p:outputLabel for="email" value="Email"/>
                                 <p:inputText id="email" value="#{studentBean.newStudent.email}" required="true"/>
                             </div>
+                            
+                            <!-- Add department selection for new students -->
+                            <div class="p-field p-col-12 p-md-4">
+                                <p:outputLabel for="department" value="Department"/>
+                                <p:selectOneMenu id="department" value="#{studentBean.newStudentDepartmentId}">
+                                    <f:selectItem itemLabel="Select Department" itemValue="#{null}" />
+                                    <f:selectItems value="#{studentBean.availableDepartments}" var="dept"
+                                                  itemLabel="#{dept.code} - #{dept.name}" itemValue="#{dept.id}" />
+                                </p:selectOneMenu>
+                            </div>
                         </div>
                         
                         <p:commandButton value="Save Student" action="#{studentBean.saveStudent()}" 
                                          update="studentTable studentForm" style="margin-top: 10px"/>
-                        
-                        <p:outputPanel id="toggleContainer">
-                            <p:toggleSwitch id="dataAccessToggle" value="#{studentBean.useJpa}" onLabel="JPA" offLabel="MyBatis">
-                                <p:ajax update="toggleContainer studentTable dataAccessInfo messages" 
-                                        listener="#{studentBean.toggleDataAccessMethod()}"/>
-                            </p:toggleSwitch>
-                        </p:outputPanel>
-                        
+
                         <p:outputPanel id="dataAccessInfo" style="margin-top: 10px">
                             <p:outputLabel value="Current data access method: " />
                             <p:outputLabel value="#{studentBean.dataAccessType}" style="font-weight: bold; color: #{studentBean.useJpa ? 'green' : 'blue'}" />
@@ -107,6 +111,12 @@
                                 #{course.code} - #{course.name}
                             </p:dataList>
                         </p:column>
+                        
+                        <p:column headerText="Department">
+                            <h:outputText value="#{student.department.code} - #{student.department.name}" 
+                                         rendered="#{student.department != null}"/>
+                            <h:outputText value="Not assigned" rendered="#{student.department == null}"/>
+                        </p:column>
                     </p:dataTable>
                     
                     <p:panel id="enrollmentPanel" header="Enroll Student in Clubs and Courses" 
@@ -144,6 +154,20 @@
                                            update="studentTable enrollmentPanel messages"
                                            process="courseMenu @this"
                                            disabled="#{studentBean.selectedCourseId == null}"/>
+                            
+                            <!-- Add Department Selection -->
+                            <h:outputText value="Assign to Department:" />
+                            <p:selectOneMenu id="departmentMenu" value="#{studentBean.selectedDepartmentId}">
+                                <f:selectItem itemLabel="Select Department" itemValue="#{null}" />
+                                <f:selectItems value="#{studentBean.availableDepartments}" var="dept"
+                                             itemLabel="#{dept.code} - #{dept.name}" itemValue="#{dept.id}" />
+                                <p:ajax event="change" update="assignDeptBtn" />
+                            </p:selectOneMenu>
+                            <p:commandButton id="assignDeptBtn" value="Assign to Department" 
+                                           action="#{studentBean.addStudentToDepartment()}" 
+                                           update="studentTable enrollmentPanel messages"
+                                           process="departmentMenu @this"
+                                           disabled="#{studentBean.selectedDepartmentId == null}"/>
                         </p:panelGrid>
 
                         <p:outputPanel style="margin-top: 10px">

@@ -17,11 +17,13 @@
         <typeAlias type="com.university.entity.Student" alias="Student"/>
         <typeAlias type="com.university.entity.Club" alias="Club"/>
         <typeAlias type="com.university.entity.Course" alias="Course"/>
+        <typeAlias type="com.university.entity.Department" alias="Department"/>
     </typeAliases>
 
     <mappers>
         <mapper resource="com/university/mybatis/StudentMapper.xml"/>
         <mapper resource="com/university/mybatis/ClubMapper.xml"/>
         <mapper resource="com/university/mybatis/CourseMapper.xml"/>
+        <mapper resource="com/university/mybatis/DepartmentMapper.xml"/>
     </mappers>
 </configuration>

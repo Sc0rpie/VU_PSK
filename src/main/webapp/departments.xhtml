@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+    <title>University Departments Management</title>
+    <h:outputStylesheet>
+        .menu-container {
+            margin-bottom: 20px;
+        }
+    </h:outputStylesheet>
+</h:head>
+<h:body>
+    <div class="card">
+        <h2>University Departments Management</h2>
+        
+        <!-- Navigation Menu -->
+        <div class="menu-container">
+            <p:menubar>
+                <p:menuitem value="Students" url="index.xhtml" icon="pi pi-user"/>
+                <p:menuitem value="Clubs" url="clubs.xhtml" icon="pi pi-users"/>
+                <p:menuitem value="Courses" url="courses.xhtml" icon="pi pi-book"/>
+                <p:menuitem value="Departments" url="departments.xhtml" icon="pi pi-building"/>
+            </p:menubar>
+        </div>
+        
+        <h:form id="departmentForm">
+            <p:panel header="Add New Department">
+                <p:messages id="messages" showDetail="true" closable="true">
+                    <p:autoUpdate/>
+                </p:messages>
+                
+                <div class="ui-fluid p-formgrid p-grid">
+                    <div class="p-field p-col-12 p-md-4">
+                        <p:outputLabel for="name" value="Department Name"/>
+                        <p:inputText id="name" value="#{departmentBean.newDepartment.name}" required="true"/>
+                    </div>
+                    
+                    <div class="p-field p-col-12 p-md-4">
+                        <p:outputLabel for="code" value="Department Code"/>
+                        <p:inputText id="code" value="#{departmentBean.newDepartment.code}" required="true"/>
+                    </div>
+                    
+                    <div class="p-field p-col-12 p-md-4">
+                        <p:outputLabel for="description" value="Description"/>
+                        <p:inputTextarea id="description" value="#{departmentBean.newDepartment.description}"/>
+                    </div>
+                </div>
+                
+                <p:commandButton value="Save Department" action="#{departmentBean.saveDepartment()}" 
+                                 update="departmentForm :departmentDataForm:departmentsTable" style="margin-top: 10px"/>
+
+                <p:outputPanel id="dataAccessInfo" style="margin-top: 10px">
+                    <p:outputLabel value="Current data access method: " />
+                    <p:outputLabel value="#{departmentBean.dataAccessType}" style="font-weight: bold; color: #{departmentBean.useJpa ? 'green' : 'blue'}" />
+                </p:outputPanel>
+            </p:panel>
+        </h:form>
+        
+        <!-- List of Departments -->
+        <h:form id="departmentDataForm">
+            <p:dataTable id="departmentsTable" value="#{departmentBean.departments}" var="department"
+                         emptyMessage="No departments found" style="margin-top: 20px"
+                         selection="#{departmentBean.selectedDepartment}" selectionMode="single"
+                         rowKey="#{department.id}">
+                         
+                <p:ajax event="rowSelect" listener="#{departmentBean.selectDepartment}" 
+                        update=":departmentDataForm:studentsTable :departmentDataForm:departmentDebug" 
+                        process="@this"/>
+                
+                <f:facet name="header">
+                    Departments List
+                </f:facet>
+                
+                <p:column headerText="ID">
+                    <h:outputText value="#{department.id}" />
+                </p:column>
+                
+                <p:column headerText="Name">
+                    <h:outputText value="#{department.name}" />
+                </p:column>
+                
+                <p:column headerText="Code">
+                    <h:outputText value="#{department.code}" />
+                </p:column>
+                
+                <p:column headerText="Description">
+                    <h:outputText value="#{department.description}" />
+                </p:column>
+                
+                <p:column headerText="Students Count">
+                    <h:outputText value="#{department.students.size()}" />
+                </p:column>
+            </p:dataTable>
+            
+            <!-- Debug panel -->
+            <p:outputPanel id="departmentDebug">
+                <p:panel rendered="#{departmentBean.selectedDepartment != null}" header="Debug Info" toggleable="true" collapsed="true">
+                    <h:outputText value="Selected Department: #{departmentBean.selectedDepartment.name}" /><br/>
+                    <h:outputText value="Student Count: #{departmentBean.selectedDepartment.students.size()}" />
+                </p:panel>
+            </p:outputPanel>
+            
+            <!-- Department Students (demonstrates navigating one-to-many relationship) -->
+            <p:dataTable id="studentsTable" value="#{departmentBean.selectedDepartment.students}" var="student"
+                         emptyMessage="No students in this department or no department selected" 
+                         style="margin-top: 20px">
+                         
+                <f:facet name="header">
+                    Department Students
+                </f:facet>
+                
+                <p:column headerText="ID">
+                    <h:outputText value="#{student.id}" />
+                </p:column>
+                
+                <p:column headerText="First Name">
+                    <h:outputText value="#{student.firstName}" />
+                </p:column>
+                
+                <p:column headerText="Last Name">
+                    <h:outputText value="#{student.lastName}" />
+                </p:column>
+                
+                <p:column headerText="Email">
+                    <h:outputText value="#{student.email}" />
+                </p:column>
+            </p:dataTable>
+        </h:form>
+    </div>
+</h:body>
+</html>

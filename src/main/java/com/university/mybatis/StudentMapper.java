@@ -13,4 +13,5 @@ public interface StudentMapper {
     void insert(Student student);
     void addStudentToClub(@Param("studentId") Long studentId, @Param("clubId") Long clubId);
     void addStudentToCourse(@Param("studentId") Long studentId, @Param("courseId") Long courseId);
+    void updateDepartment(@Param("studentId") Long studentId, @Param("departmentId") Long departmentId);
 }

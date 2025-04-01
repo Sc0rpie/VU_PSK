@@ -32,6 +32,7 @@ public class MyBatisProducer {
         configuration.getTypeAliasRegistry().registerAlias("Student", com.university.entity.Student.class);
         configuration.getTypeAliasRegistry().registerAlias("Club", com.university.entity.Club.class);
         configuration.getTypeAliasRegistry().registerAlias("Course", com.university.entity.Course.class);
+        configuration.getTypeAliasRegistry().registerAlias("Department", com.university.entity.Department.class);
 
         configuration.addMappers("com.university.mybatis");
         

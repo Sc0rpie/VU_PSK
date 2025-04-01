@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.university.mybatis.DepartmentMapper">
+
+    <resultMap id="DepartmentMap" type="Department">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="code" column="code"/>
+        <result property="description" column="description"/>
+        <collection property="students" ofType="Student">
+            <id property="id" column="student_id"/>
+            <result property="firstName" column="first_name"/>
+            <result property="lastName" column="last_name"/>
+            <result property="email" column="email"/>
+        </collection>
+    </resultMap>
+
+    <select id="findAll" resultMap="DepartmentMap">
+        SELECT 
+            d.id, d.name, d.code, d.description,
+            s.id as student_id, s.first_name, s.last_name, s.email
+        FROM departments d
+        LEFT JOIN students s ON s.department_id = d.id
+    </select>
+
+    <select id="findById" resultMap="DepartmentMap" parameterType="long">
+        SELECT 
+            d.id, d.name, d.code, d.description,
+            s.id as student_id, s.first_name, s.last_name, s.email
+        FROM departments d
+        LEFT JOIN students s ON s.department_id = d.id
+        WHERE d.id = #{id}
+    </select>
+
+    <insert id="insert" parameterType="Department" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO departments (name, code, description)
+        VALUES (#{name}, #{code}, #{description})
+    </insert>
+    
+    <update id="addStudentToDepartment">
+        UPDATE students 
+        SET department_id = #{departmentId}
+        WHERE id = #{studentId}
+    </update>
+</mapper>

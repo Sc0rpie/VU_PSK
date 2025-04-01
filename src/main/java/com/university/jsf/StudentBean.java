@@ -2,9 +2,11 @@ package com.university.jsf;
 
 import com.university.entity.Club;
 import com.university.entity.Course;
+import com.university.entity.Department;
 import com.university.entity.Student;
 import com.university.service.ClubService;
 import com.university.service.CourseService;
+import com.university.service.DepartmentService;
 import com.university.service.StudentService;
 
 import javax.annotation.PostConstruct;
@@ -29,13 +31,19 @@ public class StudentBean implements Serializable {
     @Inject
     private CourseService courseService;
     
+    @Inject
+    private DepartmentService departmentService;
+    
     private List<Student> students;
     private List<Club> availableClubs;
     private List<Course> availableCourses;
+    private List<Department> availableDepartments;
     private Student newStudent = new Student();
     private Student selectedStudent;
     private Long selectedClubId;
     private Long selectedCourseId;
+    private Long selectedDepartmentId;
+    private Long newStudentDepartmentId;
     private boolean useJpa = false; // Toggle between JPA and MyBatis
     
     @PostConstruct
@@ -43,6 +51,7 @@ public class StudentBean implements Serializable {
         loadStudents();
         loadAvailableClubs();
         loadAvailableCourses();
+        loadAvailableDepartments();
     }
     
     public void loadStudents() {
@@ -69,13 +78,31 @@ public class StudentBean implements Serializable {
         }
     }
     
+    public void loadAvailableDepartments() {
+        if (useJpa) {
+            availableDepartments = departmentService.getAllDepartmentsJpa();
+        } else {
+            availableDepartments = departmentService.getAllDepartmentsMyBatis();
+        }
+    }
+    
     public void saveStudent() {
         if (useJpa) {
+            // If department is selected, set it
+            if (newStudentDepartmentId != null) {
+                Department department = departmentService.getDepartmentByIdJpa(newStudentDepartmentId);
+                newStudent.setDepartment(department);
+            }
             studentService.saveStudentJpa(newStudent);
         } else {
             studentService.saveStudentMyBatis(newStudent);
+            // Handle department assignment separately for MyBatis after saving student
+            if (newStudentDepartmentId != null) {
+                departmentService.addStudentToDepartmentMyBatis(newStudent.getId(), newStudentDepartmentId);
+            }
         }
         newStudent = new Student();
+        newStudentDepartmentId = null;
         loadStudents();
     }
     
@@ -115,12 +142,29 @@ public class StudentBean implements Serializable {
         }
     }
     
+    public void addStudentToDepartment() {
+        if (selectedStudent != null && selectedDepartmentId != null) {
+            if (useJpa) {
+                departmentService.addStudentToDepartmentJpa(selectedStudent.getId(), selectedDepartmentId);
+            } else {
+                departmentService.addStudentToDepartmentMyBatis(selectedStudent.getId(), selectedDepartmentId);
+            }
+            
+            FacesContext.getCurrentInstance().addMessage(null, 
+                new FacesMessage(FacesMessage.SEVERITY_INFO, "Success", "Student assigned to department"));
+            
+            loadStudents();
+            selectedDepartmentId = null;
+        }
+    }
+    
     public void toggleDataAccessMethod() {
         this.useJpa = !this.useJpa;
         
         loadStudents();
         loadAvailableClubs();
         loadAvailableCourses();
+        loadAvailableDepartments();
         
         FacesContext.getCurrentInstance().addMessage(null, 
             new FacesMessage(FacesMessage.SEVERITY_INFO, 
@@ -178,11 +222,31 @@ public class StudentBean implements Serializable {
         this.selectedCourseId = selectedCourseId;
     }
     
+    public Long getSelectedDepartmentId() {
+        return selectedDepartmentId;
+    }
+    
+    public void setSelectedDepartmentId(Long selectedDepartmentId) {
+        this.selectedDepartmentId = selectedDepartmentId;
+    }
+    
+    public Long getNewStudentDepartmentId() {
+        return newStudentDepartmentId;
+    }
+    
+    public void setNewStudentDepartmentId(Long newStudentDepartmentId) {
+        this.newStudentDepartmentId = newStudentDepartmentId;
+    }
+    
     public List<Club> getAvailableClubs() {
         return availableClubs;
     }
     
     public List<Course> getAvailableCourses() {
         return availableCourses;
+    }
+    
+    public List<Department> getAvailableDepartments() {
+        return availableDepartments;
     }
 }

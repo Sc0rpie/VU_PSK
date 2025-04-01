@@ -28,7 +28,7 @@ public class ClubBean implements Serializable {
     private List<Club> clubs;
     private Club selectedClub;
     private Club newClub = new Club();
-    private boolean useJpa = false;
+    private boolean useJpa = true;
     
     @PostConstruct
     public void init() {

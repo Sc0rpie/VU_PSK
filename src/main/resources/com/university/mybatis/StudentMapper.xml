@@ -9,6 +9,12 @@
         <result property="firstName" column="first_name"/>
         <result property="lastName" column="last_name"/>
         <result property="email" column="email"/>
+        <association property="department" javaType="Department">
+            <id property="id" column="department_id"/>
+            <result property="name" column="department_name"/>
+            <result property="code" column="department_code"/>
+            <result property="description" column="department_description"/>
+        </association>
         <collection property="clubs" ofType="Club">
             <id property="id" column="club_id"/>
             <result property="name" column="club_name"/>
@@ -25,9 +31,11 @@
     <select id="findAll" resultMap="StudentMap">
         SELECT 
             s.id, s.first_name, s.last_name, s.email,
+            d.id as department_id, d.name as department_name, d.code as department_code, d.description as department_description,
             c.id as club_id, c.name as club_name, c.description as club_description,
             co.id as course_id, co.name as course_name, co.code as course_code, co.credits as course_credits
         FROM students s
+        LEFT JOIN departments d ON s.department_id = d.id
         LEFT JOIN student_clubs sc ON s.id = sc.student_id
         LEFT JOIN clubs c ON sc.club_id = c.id
         LEFT JOIN student_courses sco ON s.id = sco.student_id
@@ -37,9 +45,11 @@
     <select id="findById" resultMap="StudentMap" parameterType="long">
         SELECT 
             s.id, s.first_name, s.last_name, s.email,
+            d.id as department_id, d.name as department_name, d.code as department_code, d.description as department_description,
             c.id as club_id, c.name as club_name, c.description as club_description,
             co.id as course_id, co.name as course_name, co.code as course_code, co.credits as course_credits
         FROM students s
+        LEFT JOIN departments d ON s.department_id = d.id
         LEFT JOIN student_clubs sc ON s.id = sc.student_id
         LEFT JOIN clubs c ON sc.club_id = c.id
         LEFT JOIN student_courses sco ON s.id = sco.student_id
@@ -48,8 +58,10 @@
     </select>
 
     <insert id="insert" parameterType="Student" useGeneratedKeys="true" keyProperty="id">
-        INSERT INTO students (first_name, last_name, email)
-        VALUES (#{firstName}, #{lastName}, #{email})
+        INSERT INTO students (first_name, last_name, email, department_id)
+        VALUES (#{firstName}, #{lastName}, #{email}, 
+               <if test="department != null">#{department.id}</if>
+               <if test="department == null">null</if>)
     </insert>
     
     <insert id="addStudentToClub">
@@ -61,4 +73,10 @@
         INSERT INTO student_courses (student_id, course_id)
         VALUES (#{studentId}, #{courseId})
     </insert>
+    
+    <update id="updateDepartment">
+        UPDATE students 
+        SET department_id = #{departmentId}
+        WHERE id = #{studentId}
+    </update>
 </mapper>

@@ -21,6 +21,11 @@ public class Student implements Serializable {
     @Column(unique = true, nullable = false)
     private String email;
 
+    // Many-to-One relationship with Department
+    @ManyToOne
+    @JoinColumn(name = "department_id")
+    private Department department;
+
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
         name = "student_clubs",
@@ -67,6 +72,14 @@ public class Student implements Serializable {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Department getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(Department department) {
+        this.department = department;
     }
 
     public Set<Club> getClubs() {
