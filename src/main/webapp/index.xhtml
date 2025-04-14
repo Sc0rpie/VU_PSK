@@ -181,18 +181,21 @@
             
             <p:tab title="CDI Demo">
                 <h:form id="cdiForm">
-                    <p:panel header="CDI Component Demonstration">
-                        <h3>Random Name Generator (CDI Component)</h3>
+                    <p:panel header="CDI Lifecycle">
+                        <h3>Component Lifecycle Examples</h3>
                         
                         <p:panelGrid columns="2" styleClass="ui-noborder">
                             <h:outputText value="Generated Name:" style="font-weight:bold"/>
                             <h:outputText value="#{nameGeneratorComponent.generateName()}" />
                             
-                            <h:outputText value="Component Info:" style="font-weight:bold"/>
-                            <h:outputText value="#{nameGeneratorComponent.componentInfo}" />
+                            <h:outputText value="RequestScoped Component Info:" style="font-weight:bold"/>
+                            <h:outputText value="#{nameGeneratorComponent.componentInfo}" style="color: blue;"/>
+                            
+                            <h:outputText value="ApplicationScoped Service Info:" style="font-weight:bold"/>
+                            <h:outputText value="#{nameGeneratorComponent.randomizerInfo}" style="color: green;"/>
                         </p:panelGrid>
                         
-                        <p:commandButton value="Generate New Name" action="index?faces-redirect=true" 
+                        <p:commandButton value="Refresh Page (New Request)" action="index?faces-redirect=true" 
                                          style="margin-top: 10px"/>
                     </p:panel>
                 </h:form>
