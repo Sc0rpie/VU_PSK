@@ -6,7 +6,9 @@ import com.university.entity.Student;
 
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
+import javax.persistence.FlushModeType;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 import javax.transaction.Transactional;
 import java.util.List;
 
@@ -17,15 +19,41 @@ public class StudentJpaDao {
     private EntityManager em;
     
     public List<Student> findAll() {
-        return em.createQuery("SELECT DISTINCT s FROM Student s LEFT JOIN FETCH s.clubs LEFT JOIN FETCH s.courses", Student.class).getResultList();
+        // Set FlushMode to COMMIT to prevent auto-flush during query execution
+        Query query = em.createQuery("SELECT DISTINCT s FROM Student s LEFT JOIN FETCH s.clubs LEFT JOIN FETCH s.courses", Student.class);
+        query.setFlushMode(FlushModeType.COMMIT);
+        return query.getResultList();
     }
     
     public Student findById(Long id) {
-        return em.find(Student.class, id);
+        // First find the entity without modifying it
+        Student student = em.find(Student.class, id);
+        
+        // If student exists but has null version, fix it with a native query
+        // to avoid triggering optimistic lock exception
+        if (student != null && student.getVersion() == null) {
+            // Use a native query to update the version without triggering optimistic locking
+            em.createNativeQuery("UPDATE students SET version = 0 WHERE id = :id AND version IS NULL")
+                .setParameter("id", id)
+                .executeUpdate();
+            
+            // Clear the persistence context to force a refresh
+            em.clear();
+            
+            // Re-fetch the entity with the updated version
+            student = em.find(Student.class, id);
+        }
+        
+        return student;
     }
     
     @Transactional
     public void save(Student student) {
+        // Ensure version is not null
+        if (student.getVersion() == null) {
+            student.setVersion(0L);
+        }
+        
         if (student.getId() == null) {
             em.persist(student);
         } else {

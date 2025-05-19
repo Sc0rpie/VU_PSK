@@ -22,6 +22,9 @@
                 <p:menuitem value="Clubs" url="clubs.xhtml" icon="pi pi-users"/>
                 <p:menuitem value="Courses" url="courses.xhtml" icon="pi pi-book"/>
                 <p:menuitem value="Departments" url="departments.xhtml" icon="pi pi-building"/>
+                <p:menuitem value="CDI Demo" url="cdi-demo.xhtml" icon="pi pi-cog"/>
+                <p:menuitem value="Optimistic Lock Demo" url="optimistic-lock-demo.xhtml" icon="pi pi-lock"/>
+                <p:menuitem value="Async Demo" url="async-demo.xhtml" icon="pi pi-spinner"/>
             </p:menubar>
         </div>
         
@@ -51,10 +54,10 @@
                 <p:commandButton value="Save Department" action="#{departmentBean.saveDepartment()}" 
                                  update="departmentForm :departmentDataForm:departmentsTable" style="margin-top: 10px"/>
 
-                <p:outputPanel id="dataAccessInfo" style="margin-top: 10px">
+                <!-- <p:outputPanel id="dataAccessInfo" style="margin-top: 10px">
                     <p:outputLabel value="Current data access method: " />
                     <p:outputLabel value="#{departmentBean.dataAccessType}" style="font-weight: bold; color: #{departmentBean.useJpa ? 'green' : 'blue'}" />
-                </p:outputPanel>
+                </p:outputPanel> -->
             </p:panel>
         </h:form>
         

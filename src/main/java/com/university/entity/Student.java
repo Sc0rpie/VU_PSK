@@ -21,6 +21,10 @@ public class Student implements Serializable {
     @Column(unique = true, nullable = false)
     private String email;
 
+    // Initialize version field with a default value
+    @Version
+    private Long version = 0L;
+
     // Many-to-One relationship with Department
     @ManyToOne
     @JoinColumn(name = "department_id")
@@ -72,6 +76,14 @@ public class Student implements Serializable {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Long getVersion() {
+        return version;
+    }
+
+    public void setVersion(Long version) {
+        this.version = version;
     }
 
     public Department getDepartment() {
