@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+    <title>CDI Features Demo</title>
+    <h:outputStylesheet>
+        .menu-container {
+            margin-bottom: 20px;
+        }
+        .feature-section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .feature-header {
+            font-weight: bold;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+            color: #3f51b5;
+        }
+        .code-example {
+            background-color: #f5f5f5;
+            padding: 10px;
+            font-family: monospace;
+            border-left: 3px solid #3f51b5;
+            margin: 10px 0;
+        }
+    </h:outputStylesheet>
+</h:head>
+<h:body>
+    <div class="card">
+        <h2>CDI Features Demonstration</h2>
+        
+        <!-- Navigation Menu -->
+        <div class="menu-container">
+            <p:menubar>
+                <p:menuitem value="Students" url="index.xhtml" icon="pi pi-user"/>
+                <p:menuitem value="Clubs" url="clubs.xhtml" icon="pi pi-users"/>
+                <p:menuitem value="Courses" url="courses.xhtml" icon="pi pi-book"/>
+                <p:menuitem value="Departments" url="departments.xhtml" icon="pi pi-building"/>
+                <p:menuitem value="CDI Demo" url="cdi-demo.xhtml" icon="pi pi-cog"/>
+                <p:menuitem value="Optimistic Lock Demo" url="optimistic-lock-demo.xhtml" icon="pi pi-lock"/>
+                <p:menuitem value="Async Demo" url="async-demo.xhtml" icon="pi pi-spinner"/>
+            </p:menubar>
+        </div>
+        
+        <h:form id="cdiDemoForm">
+            <p:messages id="messages" showDetail="true" closable="true">
+                <p:autoUpdate/>
+            </p:messages>
+            
+            <p:dataTable id="studentTable" value="#{cdiDemoBean.students}" var="student"
+                         emptyMessage="No students found" style="margin-top: 20px">
+                <f:facet name="header">
+                    Students with CDI Formatting
+                </f:facet>
+                
+                <p:column headerText="ID">
+                    <h:outputText value="#{student.id}" />
+                </p:column>
+                
+                <p:column headerText="First Name">
+                    <h:outputText value="#{student.firstName}" />
+                </p:column>
+                
+                <p:column headerText="Last Name">
+                    <h:outputText value="#{student.lastName}" />
+                </p:column>
+                
+                <p:column headerText="Formatted Name">
+                    <h:outputText value="#{cdiDemoBean.formattedStudents[student.id]}" />
+                </p:column>
+            </p:dataTable>
+
+        </h:form>
+    </div>
+</h:body>
+</html>

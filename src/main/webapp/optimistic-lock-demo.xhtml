@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+<h:head>
+    <title>Optimistic Lock Demo</title>
+    <h:outputStylesheet>
+        .menu-container {
+            margin-bottom: 20px;
+        }
+        .explanation {
+            margin: 20px 0;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border-left: 5px solid #5bc0de;
+        }
+    </h:outputStylesheet>
+</h:head>
+<h:body>
+    <div class="card">
+        <h2>Optimistic Lock Demonstration</h2>
+        
+        <!-- Navigation Menu -->
+        <div class="menu-container">
+            <p:menubar>
+                <p:menuitem value="Students" url="index.xhtml" icon="pi pi-user"/>
+                <p:menuitem value="Clubs" url="clubs.xhtml" icon="pi pi-users"/>
+                <p:menuitem value="Courses" url="courses.xhtml" icon="pi pi-book"/>
+                <p:menuitem value="Departments" url="departments.xhtml" icon="pi pi-building"/>
+                <p:menuitem value="Optimistic Lock Demo" url="optimistic-lock-demo.xhtml" icon="pi pi-lock"/>
+                <p:menuitem value="Async Demo" url="async-demo.xhtml" icon="pi pi-spinner"/>
+            </p:menubar>
+        </div>
+        
+        <h:form id="studentSelectForm">
+            <p:panel header="Select a student to edit">
+                <p:messages id="messages" showDetail="true" closable="true">
+                    <p:autoUpdate/>
+                </p:messages>
+                
+                <p:dataTable id="studentTable" value="#{optimisticLockDemoBean.students}" var="student"
+                             emptyMessage="No students found">
+                    <p:column headerText="ID">
+                        <h:outputText value="#{student.id}" />
+                    </p:column>
+                    
+                    <p:column headerText="First Name">
+                        <h:outputText value="#{student.firstName}" />
+                    </p:column>
+                    
+                    <p:column headerText="Last Name">
+                        <h:outputText value="#{student.lastName}" />
+                    </p:column>
+                    
+                    <p:column headerText="Email">
+                        <h:outputText value="#{student.email}" />
+                    </p:column>
+                    
+                    <p:column headerText="Version">
+                        <h:outputText value="#{student.version}" />
+                    </p:column>
+                    
+                    <p:column headerText="Action">
+                        <p:commandButton value="Edit" action="#{optimisticLockDemoBean.selectStudent(student)}" 
+                                       update=":concurrentEditForm" process="@this"/>
+                    </p:column>
+                </p:dataTable>
+            </p:panel>
+        </h:form>
+        
+        <h:form id="concurrentEditForm">
+            <p:panel header="Concurrent Edit Simulation" rendered="#{optimisticLockDemoBean.showConcurrentForm}">
+                <p:messages id="concurrentEditMsg" showDetail="true" closable="true"/>
+
+                <p:panel header="Data Conflict Resolution" rendered="#{optimisticLockDemoBean.showConflictResolution}"
+                         styleClass="ui-widget-content ui-corner-all" style="margin-bottom: 20px; border-left: 5px solid #f8ac59; padding: 15px;">
+                    
+                    <div class="ui-g">
+                        <div class="ui-g-6">
+                            <p:panel header="Your version (outdated)">
+                                <h:panelGrid columns="2" cellpadding="5">
+                                    <h:outputText value="First Name:" style="font-weight: bold"/>
+                                    <h:outputText value="#{optimisticLockDemoBean.staleStudentCopy.firstName}"/>
+                                    
+                                    <h:outputText value="Last Name:" style="font-weight: bold"/>
+                                    <h:outputText value="#{optimisticLockDemoBean.pendingLastNameEdit}" 
+                                                  style="font-weight: bold; color: #e28055;"/>
+                                    
+                                    <h:outputText value="Version:" style="font-weight: bold"/>
+                                    <h:outputText value="#{optimisticLockDemoBean.staleStudentCopy.version}"/>
+                                </h:panelGrid>
+                            </p:panel>
+                        </div>
+                        
+                        <div class="ui-g-6">
+                            <p:panel header="Current version (in database)">
+                                <h:panelGrid columns="2" cellpadding="5">
+                                    <h:outputText value="First Name:" style="font-weight: bold"/>
+                                    <h:outputText value="#{optimisticLockDemoBean.freshStudent.firstName}"/>
+                                    
+                                    <h:outputText value="Last Name:" style="font-weight: bold"/>
+                                    <h:outputText value="#{optimisticLockDemoBean.freshStudent.lastName}"/>
+                                    
+                                    <h:outputText value="Version:" style="font-weight: bold"/>
+                                    <h:outputText value="#{optimisticLockDemoBean.freshStudent.version}"/>
+                                </h:panelGrid>
+                            </p:panel>
+                        </div>
+                    </div>
+                    
+                    <div class="ui-g" style="margin-top: 20px;">
+                        <div class="ui-g-12" style="text-align: center;">
+                            <p:commandButton value="Apply My Changes" 
+                                           action="#{optimisticLockDemoBean.applyPendingChanges()}"
+                                           update=":studentSelectForm:studentTable :concurrentEditForm"
+                                           styleClass="p-button-raised p-button-success"
+                                           style="margin-right: 10px;"/>
+                            
+                            <p:commandButton value="Discard My Changes" 
+                                           action="#{optimisticLockDemoBean.discardPendingChanges()}"
+                                           update=":studentSelectForm:studentTable :concurrentEditForm"
+                                           styleClass="p-button-raised p-button-secondary"/>
+                        </div>
+                    </div>
+                </p:panel>
+                
+                <div class="ui-fluid p-formgrid p-grid" rendered="#{!optimisticLockDemoBean.showConflictResolution}">
+                    <div class="p-field p-col-12">
+                        <h3>Selected Student: #{optimisticLockDemoBean.selectedStudent.firstName} 
+                            #{optimisticLockDemoBean.selectedStudent.lastName}</h3>
+                        <p>Current Version: #{optimisticLockDemoBean.selectedStudent.version}</p>
+                    </div>
+                    
+                    <div class="p-field p-col-12 p-md-6">
+                        <h4>First User</h4>
+                        <p:outputLabel for="firstNameEdit" value="Edit First Name"/>
+                        <p:inputText id="firstNameEdit" value="#{optimisticLockDemoBean.firstNameEdit}"/>
+                        <p:commandButton value="Update First Name" action="#{optimisticLockDemoBean.updateFirstUser()}"
+                                      update=":studentSelectForm:studentTable :concurrentEditForm" 
+                                      style="margin-top: 10px"/>
+                        <p>Simulates a user changing the first name.</p>
+                    </div>
+                    
+                    <div class="p-field p-col-12 p-md-6">
+                        <h4>Second User</h4>
+                        <p:outputLabel for="lastNameEdit" value="Edit Last Name"/>
+                        <p:inputText id="lastNameEdit" value="#{optimisticLockDemoBean.lastNameEdit}"/>
+                        <p:commandButton value="Update Last Name" action="#{optimisticLockDemoBean.updateSecondUser()}"
+                                      update=":studentSelectForm:studentTable :concurrentEditForm" 
+                                      style="margin-top: 10px"/>
+                        <p>Simulates another user changing the last name with an outdated version.</p>
+                    </div>
+                </div>
+            </p:panel>
+        </h:form>
+    </div>
+</h:body>
+</html>
